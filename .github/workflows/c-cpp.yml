@@ -1,0 +1,28 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: patkaczm/esphomeassistant:0.0.2
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build
+        run: |
+          cmake -B build
+          cmake --build build
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build
+
