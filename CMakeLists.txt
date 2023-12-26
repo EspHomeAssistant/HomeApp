@@ -12,6 +12,8 @@ option(BUILD_TESTS "Builds tests" ON)
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TEST_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/test)
 
+set(CMAKE_CXX_FLAGS "-static-libstdc++")
+
 add_subdirectory(src)
 
 if (BUILD_TESTS)
