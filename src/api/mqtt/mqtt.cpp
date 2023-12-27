@@ -10,6 +10,10 @@ namespace {
     mosquitto* mqtt_{nullptr};
 
     void callback(mosquitto* mqtt_, void* obj, const mosquitto_message* msg) {
+        if (not (mqtt_ && obj && msg)) {
+            return;
+        }
+        
         std::cout << "This is called from: 0x" << std::hex << std::this_thread::get_id() << std::endl;
         std::cout << "Received {topic: " << msg->topic << " payload: " << std::string(static_cast<const char*>(msg->payload), msg->payloadlen) << "}" << std::endl;
     }
