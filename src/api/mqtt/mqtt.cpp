@@ -1,10 +1,7 @@
 #include "api/mqtt/mqtt.hpp"
 #include <mosquitto.h>
 
-#include <iostream>
-#include <thread>
-#include <chrono>
-#include <format>
+#include <spdlog/logger.h>
 
 namespace {
     mosquitto* mqtt_{nullptr};
@@ -13,39 +10,49 @@ namespace {
         if (not (mqtt_ && obj && msg)) {
             return;
         }
-        
-        std::cout << "This is called from: 0x" << std::hex << std::this_thread::get_id() << std::endl;
-        std::cout << "Received {topic: " << msg->topic << " payload: " << std::string(static_cast<const char*>(msg->payload), msg->payloadlen) << "}" << std::endl;
+        auto self = reinterpret_cast<Mqtt*>(obj);
+        auto logger = self->getLogger();
+        logger->info("Received topic: {} payload: {}", msg->topic, std::string{static_cast<const char*>(msg->payload), static_cast<size_t>(msg->payloadlen)});
     }
 }
 
-Mqtt::Mqtt(const std::string& ) {
+Mqtt::Mqtt(const std::string& broker, std::shared_ptr<spdlog::logger> logger) 
+    : broker_{broker}
+    , logger_{logger}
+    {
     const int isInitialized = mosquitto_lib_init();
     int major, minor, revision;
     mosquitto_lib_version(&major, &minor, &revision);
-    std::cout << std::format("Mosguitto version: {}.{}.{} isInitialized: {}", major, minor, revision, (isInitialized == MOSQ_ERR_SUCCESS)? "true" : "false") << std::endl;
+    logger_->info("Mosguitto version: {}.{}.{} isInitialized: {}", major, minor, revision, (isInitialized == MOSQ_ERR_SUCCESS)? "true" : "false");
     mqtt_ = mosquitto_new(NULL, true, this);
-
-    const int isConnected = mosquitto_connect(mqtt_, "127.0.0.1", 1883, 30);
-    std::cout << "isConnected: " << std::boolalpha << (isConnected == MOSQ_ERR_SUCCESS) << std::endl;
-
-    std::cout << "This is called from: 0x" << std::hex << std::this_thread::get_id() << std::endl;
+    
+    const int isConnected = mosquitto_connect_async(mqtt_, broker_.c_str(), 1883, 30);
+    logger_->info("Connection to {} {}", broker_, isConnected == MOSQ_ERR_SUCCESS ? "succeed" : "failed");
     
     mosquitto_message_callback_set(mqtt_, callback);
 
     const int isSubscribed = mosquitto_subscribe(mqtt_, NULL, "test", 0);
-    std::cout << "Subscribed to topic: test successfully: " << std::boolalpha << (isSubscribed == MOSQ_ERR_SUCCESS) << std::endl;
+    logger_->info("Subscription to {} {}", "test", isSubscribed == MOSQ_ERR_SUCCESS ? "succeed" : "failed");
+
+    mosquitto_loop_start(mqtt_);
 
     for (int i = 0; i < 10; ++i) {
-        const int msgSent = mosquitto_publish(mqtt_, NULL, "test", 10, "hellotest", 0, false);
-        std::cout << "msgSent: " << (msgSent  == MOSQ_ERR_SUCCESS) << std::endl;
-        mosquitto_loop(	mqtt_, 0, 1);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        const std::string topic {"test"};
+        const std::string payload {"test message "+ std::to_string(i)};
+        const int msgSent = mosquitto_publish(mqtt_, NULL, topic.c_str(), payload.length() + 1, payload.c_str(), 0, false);
+        logger_->info("Msg send topic: {} payload: {} status: {}", topic, payload, msgSent == MOSQ_ERR_SUCCESS ? "success" : "fail");
     }
 }
 
 Mqtt::~Mqtt(){
+    mosquitto_loop_stop(mqtt_, true);
+    mosquitto_disconnect(mqtt_);
     mosquitto_destroy(mqtt_);
     mqtt_ = nullptr;
     mosquitto_lib_cleanup();
+}
+
+std::shared_ptr<spdlog::logger> Mqtt::getLogger()
+{
+    return logger_;
 }
