@@ -7,9 +7,21 @@
 - oatpp
 - oatpp-swagger
 - mongo-cxx-driver
+- mosquitto
+- spdlog
 
 ```bash
-$ sudo apt install googletest libgtest-dev  google-mock libgmock-dev -y
+$ add-apt-repository ppa:mosquitto-dev/mosquitto-ppa
+$ sudo apt install -y \
+     googletest \
+     libgtest-dev \
+     google-mock \
+     libgmock-dev \
+     libspdlog-dev \
+     libspdlog-dev \
+     mosquitto \
+     libmosquitto-dev \
+     pkg-config
 
 # oat++ lib:
 $ git clone https://github.com/oatpp/oatpp.git
