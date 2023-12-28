@@ -6,7 +6,7 @@ target_include_directories(example-main PRIVATE
 )
 
 target_link_libraries(example-main PRIVATE
-    mqtt-lib
+    mqtt
     spdlog::spdlog
 )
 
