@@ -17,3 +17,6 @@ add_custom_target(signal-ut-run
     COMMAND signal-ut
     DEPENDS signal-ut
 )
+
+
+add_subdirectory(mqtt)
