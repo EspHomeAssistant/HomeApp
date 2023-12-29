@@ -9,6 +9,11 @@ find_package(Threads REQUIRED)
 find_package(spdlog REQUIRED)
 
 option(BUILD_TESTS "Builds tests" ON)
+option(WITH_GDB "Adds -ggdb flag" ON)
+
+if (WITH_GDB)
+    add_compile_options("-ggdb")
+endif()
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TEST_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/test)

@@ -2,6 +2,7 @@
 #include <mosquitto.h>
 
 #include <spdlog/logger.h>
+#include "Mqtt.hpp"
 
 namespace {
     mosquitto* mqtt_{nullptr};
@@ -12,7 +13,9 @@ namespace {
         }
         auto self = reinterpret_cast<Mqtt*>(obj);
         auto logger = self->getLogger();
-        logger->info("Received topic: {} payload: {}", msg->topic, std::string{static_cast<const char*>(msg->payload), static_cast<size_t>(msg->payloadlen)});
+        const std::string payload{static_cast<const char*>(msg->payload), static_cast<size_t>(msg->payloadlen)};
+        logger->info("Received topic: {} payload: {}", msg->topic, payload);
+        self->onMessage().emit(msg->topic, payload);
     }
 }
 
@@ -30,18 +33,7 @@ Mqtt::Mqtt(const std::string& broker, std::shared_ptr<spdlog::logger> logger)
     logger_->info("Connection to {} {}", broker_, isConnected == MOSQ_ERR_SUCCESS ? "succeed" : "failed");
     
     mosquitto_message_callback_set(mqtt_, callback);
-
-    const int isSubscribed = mosquitto_subscribe(mqtt_, NULL, "test", 0);
-    logger_->info("Subscription to {} {}", "test", isSubscribed == MOSQ_ERR_SUCCESS ? "succeed" : "failed");
-
     mosquitto_loop_start(mqtt_);
-
-    for (int i = 0; i < 10; ++i) {
-        const std::string topic {"test"};
-        const std::string payload {"test message "+ std::to_string(i)};
-        const int msgSent = mosquitto_publish(mqtt_, NULL, topic.c_str(), payload.length() + 1, payload.c_str(), 0, false);
-        logger_->info("Msg send topic: {} payload: {} status: {}", topic, payload, msgSent == MOSQ_ERR_SUCCESS ? "success" : "fail");
-    }
 }
 
 Mqtt::~Mqtt(){
@@ -55,4 +47,25 @@ Mqtt::~Mqtt(){
 std::shared_ptr<spdlog::logger> Mqtt::getLogger()
 {
     return logger_;
+}
+
+Signal<std::string, std::string>& Mqtt::onMessage()
+{
+    return onMessage_;
+}
+
+bool Mqtt::publish(const std::string &topic, const std::string &payload)
+{
+    const int sendingStatus = mosquitto_publish(mqtt_, NULL, topic.c_str(), payload.length() + 1, payload.c_str(), 0, false);
+    const bool isSubscribed {MOSQ_ERR_SUCCESS == sendingStatus};
+    logger_->info("Msg send topic: {} payload: {} status: {}", topic, payload, isSubscribed ? "success" : "fail");
+    return isSubscribed;
+}
+
+bool Mqtt::subscribe(const std::string &topic)
+{
+    const int subscriptionStatus = mosquitto_subscribe(mqtt_, NULL, topic.c_str(), 0);
+    const bool isSubscribed {MOSQ_ERR_SUCCESS == subscriptionStatus};
+    logger_->info("Subscription to {} {}", topic, isSubscribed ? "succeed" : "failed");
+    return isSubscribed;
 }

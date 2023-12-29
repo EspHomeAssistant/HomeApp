@@ -3,3 +3,4 @@ include(GoogleTest)
 include(CTest)
 
 add_subdirectory(api)
+add_subdirectory(core)
