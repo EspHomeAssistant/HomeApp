@@ -1,3 +1,5 @@
+include(add_lib)
+
 add_subdirectory(api)
 add_subdirectory(core)
 
