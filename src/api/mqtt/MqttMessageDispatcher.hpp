@@ -4,14 +4,19 @@
 #include <memory>
 #include "api/Signal.hpp"
 
-
-class MqttMessageDispatcher {
+class IMqttMessageDispatcher {
 public:
-    //how about string_view
     using Topic = std::string;
 
-    void handle(const Topic& topic, const std::string& payload);
-    std::shared_ptr<Signal<std::string>> on(const Topic&);
+    virtual ~IMqttMessageDispatcher() = default;
+    virtual void handle(const Topic& topic, const std::string& payload) = 0;
+    virtual std::shared_ptr<Signal<std::string>> on(const Topic&) = 0;
+};
+
+class MqttMessageDispatcher : public IMqttMessageDispatcher {
+public:
+    void handle(const Topic& topic, const std::string& payload) override;
+    std::shared_ptr<Signal<std::string>> on(const Topic&) override;
 
 private:
     std::map<std::string, std::shared_ptr<Signal<std::string>>> handlers_;
