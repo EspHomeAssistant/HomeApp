@@ -17,8 +17,9 @@ endif()
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TEST_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/test)
+set(CMAKE_BASE_LIST_DIR ${CMAKE_CURRENT_LIST_DIR})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-# set(CMAKE_CXX_FLAGS "-static-libstdc++")
 set(CMAKE_CXX_FLAGS "-static-libstdc++ -fconcepts-diagnostics-depth=2")
 
 add_subdirectory(src)
