@@ -1,15 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
+#include <spdlog/logger.h>
 #include "api/Signal.hpp"
+#include "api/mqtt/Mqtt.hpp"
+#include "api/mqtt/MqttMessageDispatcher.hpp"
 
-class IMqtt;
-class IMqttMessageDispatcher;
-namespace spdlog {
-    class logger;
-}
+template <class T>
+concept DefaultConstructible = std::is_default_constructible<T>::value;
 
-template<class State>
+template<DefaultConstructible State>
 class MqttEntity {
 public:
     using Type = State;
@@ -22,7 +23,7 @@ public:
             , topic_{"/sensor/" + machineId_ + "/"}
             , mqtt_{mqtt}
             , mqttMessageDispatcher_{mqttMessageDispatcher}
-            , logger_{logger}
+            , logger_{logger->clone(machineId)}
             {
                 monitor();
             }
@@ -30,6 +31,7 @@ public:
         stop();
     }
 
+protected:
     State getState() const;
     Signal<State>& onStateChange();
 
@@ -38,37 +40,42 @@ private:
     void monitor();
     void stop();
 
+protected:
     const std::string machineId_;
+private:
     const std::string topic_;
     std::shared_ptr<IMqtt> mqtt_;
     std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher_;
+
+protected:
     std::shared_ptr<spdlog::logger> logger_;
     Signal<State> onStateChange_;
-    State state_;
+    State state_{};
 };
 
-template <class State>
+template <DefaultConstructible State>
 inline State MqttEntity<State>::getState() const
 {
     return state_;
 }
 
-template <class State>
+template <DefaultConstructible State>
 inline Signal<State> &MqttEntity<State>::onStateChange()
 {
     return onStateChange_;
 }
 
-template <class State>
+template <DefaultConstructible State>
 inline void MqttEntity<State>::monitor()
 {
     mqtt_->subscribe(topic_);
     mqttMessageDispatcher_->on(topic_)->connect(this, &MqttEntity::handleMessage);
 }
 
-template <class State>
+template <DefaultConstructible State>
 inline void MqttEntity<State>::stop()
 {
     mqtt_->unsubscribe(topic_);
     mqttMessageDispatcher_->on(topic_)->disconnect(this, &MqttEntity::handleMessage);
 }
+

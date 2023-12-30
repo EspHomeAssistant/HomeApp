@@ -24,3 +24,10 @@ DEPENDS
     mqtt-message-dispatcher
     nlohmann_json::nlohmann_json
 )
+
+add_library(mqtt-entity INTERFACE)
+target_link_libraries(mqtt-entity INTERFACE
+    spdlog::spdlog
+    mqtt
+    mqtt-message-dispatcher
+)
