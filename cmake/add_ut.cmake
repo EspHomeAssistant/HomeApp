@@ -37,4 +37,8 @@ add_custom_target(${ADD_UT_NAME}-ut-run
     COMMAND ${ADD_UT_NAME}-ut
     DEPENDS ${ADD_UT_NAME}-ut
 )
+
+get_property(tmp GLOBAL PROPERTY ALL_TESTS)
+set_property(GLOBAL PROPERTY ALL_TESTS "${tmp};${ADD_UT_NAME}-ut")
+
 endfunction()

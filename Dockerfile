@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 RUN cmake -B build && \
-    cmake --build build --target example-main
+    cmake --build build --target tests -- -j4
 
 # CMD "/app/build/src/example-main"
 CMD ["ctest", "--test-dir", "build"]
