@@ -15,6 +15,7 @@ public:
     virtual Signal<std::string, std::string>& onMessage() = 0;
     virtual bool publish(const std::string& topic, const std::string& payload) = 0;
     virtual bool subscribe(const std::string& topic) = 0;
+    virtual bool unsubscribe(const std::string& topic) = 0;
 };
 
 class Mqtt : public IMqtt {
@@ -30,6 +31,7 @@ public:
     Signal<std::string, std::string>& onMessage() override;
     bool publish(const std::string& topic, const std::string& payload) override;
     bool subscribe(const std::string& topic) override;
+    bool unsubscribe(const std::string& topic) override;
 
 private:
     const std::string broker_;

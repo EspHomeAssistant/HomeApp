@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Threads REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(nlohmann_json 3.11.3 REQUIRED)
 
 option(BUILD_TESTS "Builds tests" ON)
 option(WITH_GDB "Adds -ggdb flag" ON)
