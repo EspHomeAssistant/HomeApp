@@ -15,3 +15,12 @@ DEPENDS
     mqtt-message-dispatcher
     nlohmann_json::nlohmann_json
 )
+
+add_lib(NAME relay-switch 
+SOURCES RelaySwitch.cpp
+DEPENDS
+    spdlog::spdlog
+    mqtt
+    mqtt-message-dispatcher
+    nlohmann_json::nlohmann_json
+)
