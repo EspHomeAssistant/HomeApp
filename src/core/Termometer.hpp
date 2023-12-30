@@ -1,32 +1,15 @@
 #pragma once
 
-#include <memory>
 #include "api/Signal.hpp"
+#include "core/MqttEntity.hpp"
 
-class IMqtt;
-class IMqttMessageDispatcher;
-namespace spdlog {
-    class logger;
-}
-
-class Termometer {
+class Termometer : public MqttEntity<double> {
 public:
-    Termometer(const std::string& machineId, std::shared_ptr<IMqtt> mqtt, std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher, std::shared_ptr<spdlog::logger> logger);
-    ~Termometer();
-    double getTemperature() const;
+    using MqttEntity::MqttEntity;
 
-    Signal<double>& onTemperatureChange(); 
+    Type getTemperature() const;
+    Signal<Type>& onTemperatureChange();
 
 private:
-    void handleTemperature(const std::string& payload);
-    void monitor();
-    void stop();
-
-    const std::string machineId_;
-    std::shared_ptr<IMqtt> mqtt_;
-    std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher_;
-    std::shared_ptr<spdlog::logger> logger_;
-    const std::string topic_; 
-    double temperature_ {0.f};
-    Signal<double> onTemperatureChange_;
+    void handleMessage(const std::string& payload) override;
 };

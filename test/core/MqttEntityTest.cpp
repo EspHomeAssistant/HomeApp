@@ -19,6 +19,9 @@ public:
             std::shared_ptr<spdlog::logger> logger)
             : MqttEntity{machineId, mqtt, mqttMessageDispatcher, logger}
             {}
+    Type getState() const {
+        return MqttEntity::getState();
+    }
     MOCK_METHOD(void, handleMessage, (const std::string& payload), (override));
 };
 
