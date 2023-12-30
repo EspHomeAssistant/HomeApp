@@ -13,7 +13,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: patkaczm/esphomeassistant:0.0.2
+      image: patkaczm/esphomeassistant:0.0.3
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
