@@ -69,3 +69,11 @@ bool Mqtt::subscribe(const std::string &topic)
     logger_->info("Subscription to {} {}", topic, isSubscribed ? "succeed" : "failed");
     return isSubscribed;
 }
+
+bool Mqtt::unsubscribe(const std::string &topic)
+{
+    const int unsubscriptionStatus = mosquitto_unsubscribe(mqtt_, NULL, topic.c_str());
+    const bool isUnsubscribed {MOSQ_ERR_SUCCESS == unsubscriptionStatus};
+    logger_->info("Unubscription from {} {}", topic, isUnsubscribed ? "succeed" : "failed");
+    return isUnsubscribed;
+}
