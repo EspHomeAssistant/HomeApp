@@ -12,6 +12,11 @@ namespace {
 using namespace ::testing;
 using nlohmann::json;
 
+class RegistrationObserver {
+public:
+    MOCK_METHOD(void, onRegistration, (const RegisteredDevice&));
+};
+
 class RegistrationTest : public Test {
 protected:
     RegistrationTest() 
@@ -43,9 +48,11 @@ TEST_F(RegistrationTest, doesNotReactOnMsgWithIdOtherThanRegistrationRequest)
 
 TEST_F(RegistrationTest, publishRegistrationResponseOnSuccess)
 {
-    json data;
-    data["msgId"] = MsgId::RegistrationRequest;
-    data["machineId"] = "13:15";
+    const json data {
+        {"machineId", "DE:AD:BE:EF"},
+        {"msgId", MsgId::RegistrationRequest},
+        {"sensorType", "temperature"},
+    };
 
     json publishedData;
 
@@ -56,20 +63,22 @@ TEST_F(RegistrationTest, publishRegistrationResponseOnSuccess)
     registration_->handleRegistration(data.dump());
 
     EXPECT_THAT(publishedData["msgId"], Eq(MsgId::RegistrationResponse));
-    EXPECT_THAT(publishedData["machineId"], Eq("13:15"));
+    EXPECT_THAT(publishedData["machineId"], StrEq("DE:AD:BE:EF"));
     EXPECT_THAT(publishedData["status"], Eq("success"));
-    EXPECT_THAT(publishedData["registrationId"], Not(Eq(0)));    
+    EXPECT_THAT(publishedData["registrationId"], Not(Eq(0)));
 }
 
 TEST_F(RegistrationTest, returnsDifferentRegistrationIdsForDifferentMachines)
 {
     const json firstData {
         {"machineId", "DE:AD:BE:EF"},
-        {"msgId", MsgId::RegistrationRequest}
+        {"msgId", MsgId::RegistrationRequest},
+        {"sensorType", "temperature"},
     };
     const json secondData {
         {"machineId", "DE:AD:BE:EE"},
-        {"msgId", MsgId::RegistrationRequest}
+        {"msgId", MsgId::RegistrationRequest},
+        {"sensorType", "temperature"},
     };
 
     int firstRegistrationId{-1};
@@ -93,7 +102,8 @@ TEST_F(RegistrationTest, returnsSameRegistrationIdForTheSameMachine)
 {
     const json data {
         {"machineId", "DE:AD:BE:EF"},
-        {"msgId", MsgId::RegistrationRequest}
+        {"msgId", MsgId::RegistrationRequest},
+        {"sensorType", "temperature"},
     };
     int firstRegistrationId{-1};
     int secondRegistrationId{-1};
@@ -110,6 +120,23 @@ TEST_F(RegistrationTest, returnsSameRegistrationIdForTheSameMachine)
     registration_->handleRegistration(data.dump());
 
     EXPECT_THAT(firstRegistrationId, Eq(secondRegistrationId));
+}
+
+TEST_F(RegistrationTest, emitsRegisteredDeviceOnFirstRegistration)
+{
+    const json data {
+        {"machineId", "DE:AD:BE:EF"},
+        {"msgId", MsgId::RegistrationRequest},
+        {"sensorType", "temperature"},
+    };
+    const RegisteredDevice expectedDevice {"DE:AD:BE:EF", "temperature"};
+    RegistrationObserver observer;
+    registration_->onRegistration().connect(&observer, &RegistrationObserver::onRegistration);
+    EXPECT_CALL(observer, onRegistration(Eq(expectedDevice))).Times(1);
+    EXPECT_CALL(*mqttMock_, publish("/register/", _)).Times(2);
+
+    registration_->handleRegistration(data.dump());
+    registration_->handleRegistration(data.dump());   
 }
 
 }

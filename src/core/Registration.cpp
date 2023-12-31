@@ -26,7 +26,8 @@ try {
     Registration::RegistrationId registrationId;
 
     const Registration::MachineId machineId {request["machineId"]}; 
-    if (registeredDevices_.contains(machineId)) {
+    const bool hasBeenAlreadyRegistered {registeredDevices_.contains(machineId)};
+    if (hasBeenAlreadyRegistered) {
         logger_->info("Device {} has been already registered with id {}", machineId, registeredDevices_[machineId]);
         registrationId = registeredDevices_[machineId];
     } else {
@@ -43,9 +44,17 @@ try {
     };
  
     mqtt_->publish("/register/", response.dump());
+    if (not hasBeenAlreadyRegistered) {
+        onRegistration_.emit({machineId, request["sensorType"]});
+    }
 
 } catch(const nlohmann::json::parse_error& e) {
     logger_->warn(e.what());
+}
+
+Signal<RegisteredDevice>& Registration::onRegistration()
+{
+    return onRegistration_;
 }
 
 Registration::RegistrationId Registration::getRegistrationId() const

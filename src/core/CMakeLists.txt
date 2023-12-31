@@ -1,11 +1,11 @@
 add_lib(NAME registration 
-        SOURCES Registration.cpp
-        DEPENDS
-            spdlog::spdlog
-            mqtt
-            mqtt-message-dispatcher
-            nlohmann_json::nlohmann_json
-        )
+SOURCES Registration.cpp
+DEPENDS
+    spdlog::spdlog
+    mqtt
+    mqtt-message-dispatcher
+    nlohmann_json::nlohmann_json
+)
 
 add_lib(NAME termometer 
 SOURCES Termometer.cpp
@@ -30,4 +30,8 @@ target_link_libraries(mqtt-entity INTERFACE
     spdlog::spdlog
     mqtt
     mqtt-message-dispatcher
+)
+
+add_lib(NAME registered-device 
+SOURCES RegisteredDevice.cpp
 )

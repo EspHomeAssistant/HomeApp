@@ -18,3 +18,7 @@ add_ut(NAME mqtt-entity
        DEPENDS 
         spdlog::spdlog
 )
+
+add_ut(NAME registered-device 
+       SOURCES RegisteredDeviceTest.cpp
+)
