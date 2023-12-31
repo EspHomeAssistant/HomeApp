@@ -17,33 +17,32 @@ Registration::Registration(std::shared_ptr<IMqtt> mqtt, std::shared_ptr<IMqttMes
 
 void Registration::handleRegistration(const std::string &payload)
 try {
-    logger_->info("Received register request {}",payload);
     using nlohmann::json;
     const json request = json::parse(payload);
     if (request["msgId"] != MsgId::RegistrationRequest) {
         return;
     }
 
+    Registration::RegistrationId registrationId;
+
     const Registration::MachineId machineId {request["machineId"]}; 
     if (registeredDevices_.contains(machineId)) {
         logger_->info("Device {} has been already registered with id {}", machineId, registeredDevices_[machineId]);
-        return;
+        registrationId = registeredDevices_[machineId];
+    } else {
+        registrationId = getRegistrationId();
+        registeredDevices_[machineId] = registrationId;
+        logger_->info("Device {} has been registered with id {}", machineId, registrationId);
     }
 
-    Registration::RegistrationId registrationId = getRegistrationId();
-
-    json response;
-    response["machineId"] = request["machineId"];
-    response["status"] = "success";
-    response["registrationId"] = registrationId;
-    response["msgId"] = MsgId::RegistrationResponse;
-    
-    registeredDevices_["machineId"] = registrationId;
-
+    const json response{
+        {"machineId", machineId},
+        {"status", "success"},
+        {"registrationId", registrationId},
+        {"msgId", MsgId::RegistrationResponse},
+    };
+ 
     mqtt_->publish("/register/", response.dump());
-
-    logger_->info("Device {} has been registered with id {}", machineId, registrationId);
-
 
 } catch(const nlohmann::json::parse_error& e) {
     logger_->warn(e.what());
