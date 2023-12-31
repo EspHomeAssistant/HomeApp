@@ -1,3 +1,7 @@
+add_lib(NAME registered-device 
+SOURCES RegisteredDevice.cpp
+)
+
 add_lib(NAME registration 
 SOURCES Registration.cpp
 DEPENDS
@@ -5,6 +9,7 @@ DEPENDS
     mqtt
     mqtt-message-dispatcher
     nlohmann_json::nlohmann_json
+    registered-device
 )
 
 add_lib(NAME termometer 
@@ -32,6 +37,3 @@ target_link_libraries(mqtt-entity INTERFACE
     mqtt-message-dispatcher
 )
 
-add_lib(NAME registered-device 
-SOURCES RegisteredDevice.cpp
-)

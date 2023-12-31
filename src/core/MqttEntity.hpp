@@ -6,6 +6,7 @@
 #include "api/Signal.hpp"
 #include "api/mqtt/Mqtt.hpp"
 #include "api/mqtt/MqttMessageDispatcher.hpp"
+#include "core/DeviceType.hpp"
 
 template <class T>
 concept DefaultConstructible = std::is_default_constructible<T>::value;
@@ -31,6 +32,9 @@ public:
         stop();
     }
 
+    std::string getMachineId() const;
+    virtual DeviceType getDeviceType() const = 0;
+
 protected:
     State getState() const;
     Signal<State>& onStateChange();
@@ -52,6 +56,12 @@ protected:
     Signal<State> onStateChange_;
     State state_{};
 };
+
+template <DefaultConstructible State>
+inline std::string MqttEntity<State>::getMachineId() const
+{
+    return machineId_;
+}
 
 template <DefaultConstructible State>
 inline State MqttEntity<State>::getState() const

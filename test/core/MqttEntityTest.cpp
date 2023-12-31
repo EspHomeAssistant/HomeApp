@@ -4,6 +4,7 @@
 #include "api/mqtt/MqttMock.hpp"
 #include "api/mqtt/MqttMessageDispatcherMock.hpp"
 #include "core/MqttEntity.hpp"
+#include "core/DeviceType.hpp"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -21,6 +22,9 @@ public:
             {}
     Type getState() const {
         return MqttEntity::getState();
+    }
+    DeviceType getDeviceType() const override {
+        return DeviceType::Temperature;
     }
     MOCK_METHOD(void, handleMessage, (const std::string& payload), (override));
 };
@@ -61,7 +65,16 @@ TEST_F(MqttEntityTest, handlesMessageOnMsgArrive)
     const std::string data{"some data"};
     EXPECT_CALL(*mqttEntity_, handleMessage(StrEq(data))).Times(1);
     signal_->emit(data);
-    
+}
+
+TEST_F(MqttEntityTest, returnsMachineId)
+{
+    EXPECT_THAT(mqttEntity_->getMachineId(), StrEq(machineId_));    
+}
+
+TEST_F(MqttEntityTest, returnsDeviceType)
+{
+    EXPECT_THAT(mqttEntity_->getDeviceType(), Eq(DeviceType::Temperature));
 }
 
 }
