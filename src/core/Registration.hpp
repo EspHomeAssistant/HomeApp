@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <map>
+#include "api/Signal.hpp"
+#include "core/RegisteredDevice.hpp"
 
 class IMqttMessageDispatcher;
 class IMqtt;
@@ -15,6 +17,7 @@ public:
     Registration(std::shared_ptr<IMqtt> mqtt, std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher, std::shared_ptr<spdlog::logger> logger);
 
     void handleRegistration(const std::string& payload);
+    Signal<RegisteredDevice>& onRegistration();
 
 private:
     using MachineId = std::string;
@@ -26,4 +29,5 @@ private:
     std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher_;
     std::map<MachineId, RegistrationId> registeredDevices_;
     std::shared_ptr<spdlog::logger> logger_;
+    Signal<RegisteredDevice> onRegistration_;
 };
