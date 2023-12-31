@@ -1,3 +1,5 @@
+[![C/C++ CI](https://github.com/EspHomeAssistant/HomeApp/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/EspHomeAssistant/HomeApp/actions/workflows/c-cpp.yml)
+
 # Dependencies
 - googletest
 - libgtest-dev

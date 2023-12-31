@@ -61,4 +61,55 @@ TEST_F(RegistrationTest, publishRegistrationResponseOnSuccess)
     EXPECT_THAT(publishedData["registrationId"], Not(Eq(0)));    
 }
 
+TEST_F(RegistrationTest, returnsDifferentRegistrationIdsForDifferentMachines)
+{
+    const json firstData {
+        {"machineId", "DE:AD:BE:EF"},
+        {"msgId", MsgId::RegistrationRequest}
+    };
+    const json secondData {
+        {"machineId", "DE:AD:BE:EE"},
+        {"msgId", MsgId::RegistrationRequest}
+    };
+
+    int firstRegistrationId{-1};
+    int secondRegistrationId{-1};
+
+    EXPECT_CALL(*mqttMock_, publish("/register/", _)).WillOnce(Invoke([&firstRegistrationId](Unused, const std::string& data){
+        firstRegistrationId = json::parse(data)["registrationId"];
+        return true;
+    })).WillOnce(Invoke([&secondRegistrationId](Unused, const std::string& data){
+        secondRegistrationId = json::parse(data)["registrationId"];
+        return true;
+    }));
+
+    registration_->handleRegistration(firstData.dump());
+    registration_->handleRegistration(secondData.dump());
+
+    EXPECT_THAT(firstRegistrationId, Not(Eq(secondRegistrationId)));
+}
+
+TEST_F(RegistrationTest, returnsSameRegistrationIdForTheSameMachine)
+{
+    const json data {
+        {"machineId", "DE:AD:BE:EF"},
+        {"msgId", MsgId::RegistrationRequest}
+    };
+    int firstRegistrationId{-1};
+    int secondRegistrationId{-1};
+
+    EXPECT_CALL(*mqttMock_, publish("/register/", _)).WillOnce(Invoke([&firstRegistrationId](Unused, const std::string& data){
+        firstRegistrationId = json::parse(data)["registrationId"];
+        return true;
+    })).WillOnce(Invoke([&secondRegistrationId](Unused, const std::string& data){
+        secondRegistrationId = json::parse(data)["registrationId"];
+        return true;
+    }));
+
+    registration_->handleRegistration(data.dump());
+    registration_->handleRegistration(data.dump());
+
+    EXPECT_THAT(firstRegistrationId, Eq(secondRegistrationId));
+}
+
 }
