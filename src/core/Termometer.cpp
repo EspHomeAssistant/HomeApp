@@ -13,6 +13,11 @@ Signal<Termometer::Type> &Termometer::onTemperatureChange()
     return onStateChange();
 }
 
+DeviceType Termometer::getDeviceType() const
+{
+    return DeviceType::Temperature;
+}
+
 void Termometer::handleMessage(const std::string &payload)
 try{
     using nlohmann::json;

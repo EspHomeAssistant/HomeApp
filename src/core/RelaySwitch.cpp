@@ -14,6 +14,11 @@ Signal<RelaySwitch::Type> &RelaySwitch::onStateChange()
     return MqttEntity::onStateChange();
 }
 
+DeviceType RelaySwitch::getDeviceType() const
+{
+    return DeviceType::Relay;
+}
+
 void RelaySwitch::handleMessage(const std::string &payload)
 try{
     using nlohmann::json;

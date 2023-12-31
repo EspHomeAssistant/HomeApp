@@ -1,11 +1,6 @@
 #pragma once
 #include <string>
-
-enum class DeviceType {
-    Unknown,
-    Temperature,
-    Relay
-};
+#include "core/DeviceType.hpp"
 
 struct RegisteredDevice {
     RegisteredDevice(const std::string& machineId, const std::string& type);
