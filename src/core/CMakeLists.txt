@@ -45,8 +45,7 @@ add_lib(NAME device-controller
 SOURCES DeviceController.cpp
 DEPENDS
     spdlog::spdlog
-    mqtt
-    mqtt-message-dispatcher
-    relay-switch
+    registered-device
     termometer
+    relay-switch
 )

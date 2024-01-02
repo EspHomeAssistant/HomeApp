@@ -1,5 +1,7 @@
 #include "MqttEntity.hpp"
 
+#include <utility>
+
 MqttEntity::MqttEntity( 
             const std::string& machineId,
             std::shared_ptr<IMqtt> mqtt,
@@ -19,6 +21,35 @@ MqttEntity::~MqttEntity()
     stop();
 }
 
+MqttEntity::MqttEntity(MqttEntity&& other)
+{
+    other.stop();
+
+    other.shouldUnsubscribe = false;
+    machineId_ = std::exchange(other.machineId_, "");
+    topic_ = std::exchange(other.topic_, "");
+    mqtt_ = std::exchange(other.mqtt_, nullptr);
+    mqttMessageDispatcher_ = std::exchange(other.mqttMessageDispatcher_, nullptr);
+    logger_ = std::exchange(other.logger_, nullptr);
+
+    monitor();
+}
+
+MqttEntity &MqttEntity::operator=(MqttEntity && other)
+{
+    other.stop();
+
+    other.shouldUnsubscribe = false;
+    machineId_ = std::exchange(other.machineId_, "");
+    topic_ = std::exchange(other.topic_, "");
+    mqtt_ = std::exchange(other.mqtt_, nullptr);
+    mqttMessageDispatcher_ = std::exchange(other.mqttMessageDispatcher_, nullptr);
+    logger_ = std::exchange(other.logger_, nullptr);
+
+    monitor();
+    return *this;
+}
+
 std::string MqttEntity::getMachineId() const
 {
     return machineId_;
@@ -32,6 +63,8 @@ void MqttEntity::monitor()
 
 void MqttEntity::stop()
 {
-    mqtt_->unsubscribe(topic_);
-    mqttMessageDispatcher_->on(topic_)->disconnect(this, &MqttEntity::handleMessage);
+    if (shouldUnsubscribe) {
+        mqtt_->unsubscribe(topic_);
+        mqttMessageDispatcher_->on(topic_)->disconnect(this, &MqttEntity::handleMessage);
+    }
 }
