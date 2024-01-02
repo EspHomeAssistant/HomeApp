@@ -3,8 +3,9 @@
 #include "api/Signal.hpp"
 #include "core/MqttEntity.hpp"
 #include "core/DeviceType.hpp"
+#include "core/Stateful.hpp"
 
-class RelaySwitch : public MqttEntity<std::vector<bool>>{
+class RelaySwitch : public MqttEntity, protected Stateful<std::vector<bool>>{
 public:
     using MqttEntity::MqttEntity;
 

@@ -4,8 +4,6 @@ add_ut(NAME registration
 
 add_ut(NAME termometer
        SOURCES TermometerTest.cpp
-       DEPENDS
-        mqtt-entity
 )
 
 add_ut(NAME relay-switch 
@@ -13,12 +11,14 @@ add_ut(NAME relay-switch
 )
 
 add_ut(NAME mqtt-entity
-       SOURCES MqttEntityTest.cpp 
-       HEADER_ONLY TRUE 
-       DEPENDS 
-        spdlog::spdlog
+       SOURCES MqttEntityTest.cpp  
 )
 
 add_ut(NAME registered-device 
        SOURCES RegisteredDeviceTest.cpp
 )
+
+add_ut(NAME stateful
+       SOURCES StatefulTest.cpp
+       HEADER_ONLY TRUE
+       )

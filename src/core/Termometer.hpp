@@ -3,8 +3,9 @@
 #include "api/Signal.hpp"
 #include "core/MqttEntity.hpp"
 #include "core/DeviceType.hpp"
+#include "core/Stateful.hpp"
 
-class Termometer : public MqttEntity<double> {
+class Termometer : public MqttEntity, protected Stateful<double> {
 public:
     using MqttEntity::MqttEntity;
 
