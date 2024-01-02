@@ -4,6 +4,7 @@
 #include "api/mqtt/MqttMock.hpp"
 #include "api/mqtt/MqttMessageDispatcherMock.hpp"
 #include "core/RelaySwitch.hpp"
+#include "core/MsgId.hpp"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -47,7 +48,8 @@ protected:
             false,
             true
     };
-    const json data_ {
+    const json relayNotif_ {
+        {"msgId", MsgId::RelayStateNotif},
         {"state",  relay_},
     };
 };
@@ -57,9 +59,21 @@ TEST_F(RelaySwitchTest, returnEmptyOnInit)
     EXPECT_THAT(relaySwitch_->getRelayState(), ContainerEq(std::vector<bool>{}));
 }
 
+TEST_F(RelaySwitchTest, ignoresMessageIfMsgIdIsNotRelayStateNotif)
+{
+    RelayStateObserver observer;
+    relaySwitch_->onStateChange().connect(&observer, &RelayStateObserver::onRelayState);
+    EXPECT_CALL(observer, onRelayState(ContainerEq(relay_))).Times(0);
+
+    json wrongMsgId = relayNotif_;
+    wrongMsgId["msgId"] = MsgId::TemperatureNotif;
+
+    signal_->emit(wrongMsgId.dump());
+}
+
 TEST_F(RelaySwitchTest, updatesRelayState)
 {
-    signal_->emit(data_.dump());
+    signal_->emit(relayNotif_.dump());
     EXPECT_THAT(relaySwitch_->getRelayState(), ContainerEq(relay_));
 }
 
@@ -69,7 +83,32 @@ TEST_F(RelaySwitchTest, emitsRelayStateOnUpdate)
     relaySwitch_->onStateChange().connect(&observer, &RelayStateObserver::onRelayState);
     EXPECT_CALL(observer, onRelayState(ContainerEq(relay_))).Times(1);
 
-    signal_->emit(data_.dump());
+    signal_->emit(relayNotif_.dump());
 }
+
+TEST_F(RelaySwitchTest, onSendsAllRelayOutputsAsTrue)
+{
+    using nlohmann::json;
+    const json expected {
+        {"msgId", MsgId::RelayStateRequest},
+        {"state", std::vector<bool>{true, true, true,true}}
+    }; 
+    signal_->emit(relayNotif_.dump());
+    EXPECT_CALL(*mqttMock_, publish(topic_, StrEq(expected.dump()))).Times(1);
+    relaySwitch_->on();
+}
+
+TEST_F(RelaySwitchTest, offSendsAllRelayOutputsAsFalse)
+{
+    using nlohmann::json;
+    const json expected {
+        {"msgId", MsgId::RelayStateRequest},
+        {"state", std::vector<bool>{false, false, false, false}}
+    }; 
+    signal_->emit(relayNotif_.dump());
+    EXPECT_CALL(*mqttMock_, publish(topic_, StrEq(expected.dump()))).Times(1);
+    relaySwitch_->off();
+}
+
 
 }

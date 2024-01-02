@@ -68,3 +68,8 @@ void MqttEntity::stop()
         mqttMessageDispatcher_->on(topic_)->disconnect(this, &MqttEntity::handleMessage);
     }
 }
+
+void MqttEntity::sendRequest(const std::string& payload)
+{
+    mqtt_->publish(topic_, payload);
+}
