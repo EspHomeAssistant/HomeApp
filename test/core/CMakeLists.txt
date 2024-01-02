@@ -22,3 +22,7 @@ add_ut(NAME stateful
        SOURCES StatefulTest.cpp
        HEADER_ONLY TRUE
        )
+
+add_ut(NAME device-controller
+       SOURCES DeviceControllerTest.cpp
+)

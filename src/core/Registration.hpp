@@ -11,13 +11,20 @@ namespace spdlog {
     class logger;
 }
 
-class Registration
+class IRegistration {
+public:
+    virtual ~IRegistration() = default;
+    virtual void handleRegistration(const std::string& payload) = 0;
+    virtual Signal<RegisteredDevice>& onRegistration() = 0;
+};
+
+class Registration: public IRegistration
 {
 public:
     Registration(std::shared_ptr<IMqtt> mqtt, std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher, std::shared_ptr<spdlog::logger> logger);
 
-    void handleRegistration(const std::string& payload);
-    Signal<RegisteredDevice>& onRegistration();
+    void handleRegistration(const std::string& payload) override;
+    Signal<RegisteredDevice>& onRegistration() override;
 
 private:
     using MachineId = std::string;

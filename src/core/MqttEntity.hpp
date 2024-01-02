@@ -14,6 +14,10 @@ public:
             std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher,
             std::shared_ptr<spdlog::logger> logger);
     virtual ~MqttEntity();
+    MqttEntity(const MqttEntity&) = delete;
+    MqttEntity(MqttEntity&&);
+    MqttEntity& operator=(const MqttEntity&) = delete;
+    MqttEntity& operator=(MqttEntity&&);    
 
     std::string getMachineId() const;
     virtual DeviceType getDeviceType() const = 0;
@@ -24,13 +28,15 @@ private:
     void stop();
 
 protected:
-    const std::string machineId_;
+    std::string machineId_;
 private:
-    const std::string topic_;
+    std::string topic_;
     std::shared_ptr<IMqtt> mqtt_;
     std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher_;
 
 protected:
     std::shared_ptr<spdlog::logger> logger_;
+private:
+    bool shouldUnsubscribe{true};
 };
 
