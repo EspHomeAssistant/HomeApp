@@ -10,10 +10,13 @@ public:
     using MqttEntity::MqttEntity;
 
     Type getRelayState() const;
-    Signal<Type>& onStateChange(); 
+    Signal<Type>& onStateChange();
+    void on();
+    void off();
 
     DeviceType getDeviceType() const override;
 
 private:
+    void requestState(const Type& payload);
     void handleMessage(const std::string& payload) override;
 };

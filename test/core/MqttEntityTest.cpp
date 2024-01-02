@@ -12,7 +12,7 @@ namespace {
 using namespace ::testing;
 using nlohmann::json;
 
-class Concrete : public MqttEntity{
+class Concrete : public MqttEntity {
 public:
     Concrete(const std::string& machineId,
             std::shared_ptr<IMqtt> mqtt,
@@ -23,6 +23,10 @@ public:
 
     DeviceType getDeviceType() const override {
         return DeviceType::Temperature;
+    }
+
+    void sendRequest(const std::string& msg) {
+        MqttEntity::sendRequest(msg);
     }
 
     MOCK_METHOD(void, handleMessage, (const std::string& payload), (override));
@@ -69,6 +73,13 @@ TEST_F(MqttEntityTest, returnsMachineId)
 TEST_F(MqttEntityTest, returnsDeviceType)
 {
     EXPECT_THAT(mqttEntity_->getDeviceType(), Eq(DeviceType::Temperature));
+}
+
+TEST_F(MqttEntityTest, sendsMsgWithTopic)
+{
+    const std::string someMessage {"some message"};
+    EXPECT_CALL(*mqttMock_, publish(topic_, StrEq(someMessage))).Times(1);
+    mqttEntity_->sendRequest(someMessage);
 }
 
 }

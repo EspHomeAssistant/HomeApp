@@ -22,6 +22,9 @@ public:
     std::string getMachineId() const;
     virtual DeviceType getDeviceType() const = 0;
 
+protected:
+    void sendRequest(const std::string& request);
+
 private:
     virtual void handleMessage(const std::string& payload) = 0;
     void monitor();
@@ -29,6 +32,7 @@ private:
 
 protected:
     std::string machineId_;
+
 private:
     std::string topic_;
     std::shared_ptr<IMqtt> mqtt_;
@@ -36,7 +40,9 @@ private:
 
 protected:
     std::shared_ptr<spdlog::logger> logger_;
+
 private:
     bool shouldUnsubscribe{true};
+
 };
 

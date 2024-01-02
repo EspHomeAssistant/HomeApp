@@ -4,6 +4,7 @@
 #include "api/mqtt/MqttMock.hpp"
 #include "api/mqtt/MqttMessageDispatcherMock.hpp"
 #include "core/Termometer.hpp"
+#include "core/MsgId.hpp"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -43,6 +44,7 @@ protected:
 
     const double temperature_ {36.6f};
     const json data_ {
+        {"msgId", MsgId::TemperatureNotif},
         {"temperature", temperature_ },
     };
 };
@@ -50,6 +52,18 @@ protected:
 TEST_F(TermometerTest, returnZeroTemperatureOnInit)
 {
     EXPECT_THAT(termometer_->getTemperature(), DoubleEq(0));
+}
+
+TEST_F(TermometerTest, ignoresMessageIfMsgIdIsNotTemperatureNotif)
+{
+    TemperatureObserver observer;
+    termometer_->onTemperatureChange().connect(&observer, &TemperatureObserver::onTemperature);
+    EXPECT_CALL(observer, onTemperature(DoubleEq(temperature_))).Times(0);
+
+    json wrongMsgId = data_;
+    wrongMsgId["msgId"] = MsgId::RelayStateNotif;
+
+    signal_->emit(wrongMsgId.dump());
 }
 
 TEST_F(TermometerTest, updatesTemperature)
@@ -66,6 +80,5 @@ TEST_F(TermometerTest, emitsTemperatureOnUpdate)
 
     signal_->emit(data_.dump());
 }
-
 
 }
