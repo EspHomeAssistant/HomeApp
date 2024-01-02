@@ -11,7 +11,7 @@ RelaySwitch::Type RelaySwitch::getRelayState() const
 
 Signal<RelaySwitch::Type> &RelaySwitch::onStateChange()
 {
-    return MqttEntity::onStateChange();
+    return Stateful::onStateChange();
 }
 
 DeviceType RelaySwitch::getDeviceType() const

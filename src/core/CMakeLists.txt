@@ -19,6 +19,7 @@ DEPENDS
     mqtt
     mqtt-message-dispatcher
     nlohmann_json::nlohmann_json
+    mqtt-entity
 )
 
 add_lib(NAME relay-switch 
@@ -28,12 +29,24 @@ DEPENDS
     mqtt
     mqtt-message-dispatcher
     nlohmann_json::nlohmann_json
+    mqtt-entity
 )
 
-add_library(mqtt-entity INTERFACE)
-target_link_libraries(mqtt-entity INTERFACE
+add_lib(NAME mqtt-entity
+SOURCES MqttEntity.cpp
+DEPENDS
     spdlog::spdlog
     mqtt
     mqtt-message-dispatcher
+    nlohmann_json::nlohmann_json
 )
 
+add_lib(NAME device-controller
+SOURCES DeviceController.cpp
+DEPENDS
+    spdlog::spdlog
+    mqtt
+    mqtt-message-dispatcher
+    relay-switch
+    termometer
+)

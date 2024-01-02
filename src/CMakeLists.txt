@@ -13,6 +13,12 @@ target_link_libraries(example-main PRIVATE
     mqtt-message-dispatcher
     spdlog::spdlog
     registration
+    registered-device
+    registration
+    mqtt-entity
+    termometer
+    relay-switch
+    device-controller
 )
 
 add_custom_target(example-main-run

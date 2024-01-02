@@ -37,8 +37,8 @@ Mqtt::Mqtt(const std::string& broker, std::shared_ptr<spdlog::logger> logger)
 }
 
 Mqtt::~Mqtt(){
-    mosquitto_loop_stop(mqtt_, true);
     mosquitto_disconnect(mqtt_);
+    mosquitto_loop_stop(mqtt_, true);
     mosquitto_destroy(mqtt_);
     mqtt_ = nullptr;
     mosquitto_lib_cleanup();
