@@ -1,4 +1,4 @@
-FROM patkaczm/esphomeassistant:0.0.3
+FROM patkaczm/esphomeassistant:0.0.4
 
 # Set the working directory
 WORKDIR /app
