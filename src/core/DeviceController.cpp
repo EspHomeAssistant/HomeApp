@@ -24,14 +24,14 @@ DeviceController::~DeviceController()
     registration_->onRegistration().disconnect(this, &DeviceController::onRegistration);
 }
 
-MqttEntity* DeviceController::getDevice(const std::string &machineId)
+std::shared_ptr<MqttEntity> DeviceController::getDevice(const std::string &machineId)
 {   
     auto hasMachineId = [&machineId](const auto& device){
         return device->getMachineId() == machineId;
     };
     const auto found = std::ranges::find_if(devices_, hasMachineId);
     if (found != std::end(devices_)) {
-        return found->get();
+        return *found;
     }
     return nullptr;
 }
