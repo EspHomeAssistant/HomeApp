@@ -19,7 +19,7 @@ public:
                   std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher, std::shared_ptr<spdlog::logger> logger);
     ~DeviceController();
 
-    MqttEntity* getDevice(const std::string& machineId);
+    std::shared_ptr<MqttEntity> getDevice(const std::string& machineId);
 
 private:
     void onRegistration(const RegisteredDevice&);
@@ -28,5 +28,5 @@ private:
     std::shared_ptr<IMqtt> mqtt_;
     std::shared_ptr<IMqttMessageDispatcher> mqttMessageDispatcher_;
     std::shared_ptr<spdlog::logger> logger_;
-    std::vector<std::unique_ptr<MqttEntity>> devices_;
+    std::vector<std::shared_ptr<MqttEntity>> devices_;
 };

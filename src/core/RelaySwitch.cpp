@@ -60,6 +60,10 @@ try{
     using nlohmann::json;
     const json data = json::parse(payload);
 
+    if (not data.contains("msgId")) {
+        return;
+    }
+
     if (data["msgId"] != MsgId::RelayStateNotif) {
         return;
     }

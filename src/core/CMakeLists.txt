@@ -49,3 +49,11 @@ DEPENDS
     termometer
     relay-switch
 )
+
+add_lib(NAME temperature-controller
+SOURCES TemperatureController.cpp
+DEPENDS
+    spdlog::spdlog
+    termometer
+    relay-switch
+)

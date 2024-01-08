@@ -26,3 +26,7 @@ add_ut(NAME stateful
 add_ut(NAME device-controller
        SOURCES DeviceControllerTest.cpp
 )
+
+add_ut(NAME temperature-controller
+       SOURCES TemperatureControllerTest.cpp
+)

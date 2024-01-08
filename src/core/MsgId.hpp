@@ -4,4 +4,5 @@ enum class MsgId {
     TemperatureNotif = 3,
     RelayStateNotif = 4,
     RelayStateRequest = 5,
+    KeepAlive = 6,
 };
